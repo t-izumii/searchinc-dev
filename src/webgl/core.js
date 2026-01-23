@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Camera } from "./Camera.js";
 import { Light } from "./Light.js";
+import { Plane } from "./objects/seaLevel/Plane.js";
 import { GlbModel } from "./objects/GlbModel.js";
 import { TheatreManager } from "./TheatreManager.js";
 import { config } from "../config.js";
@@ -86,6 +87,11 @@ export class WebGLApp {
       .catch((error) => {
         console.error("Failed to load model:", error);
       });
+
+
+    // 水面を作成
+    const sea = new Plane();
+    this.scene.add(sea.getMesh());
   }
 
   // sceneのgetterを追加

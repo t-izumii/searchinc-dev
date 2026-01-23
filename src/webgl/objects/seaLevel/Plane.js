@@ -1,12 +1,12 @@
 import * as THREE from "three";
 
 export class Plane {
-  constructor(width = 2, height = 2, widthSegments = 32, heightSegments = 32) {
+  constructor() {
     this.mesh = null;
-    this.width = width;
-    this.height = height;
-    this.widthSegments = widthSegments;
-    this.heightSegments = heightSegments;
+    this.width = 100;
+    this.height = 100;
+    this.widthSegments = 32;
+    this.heightSegments = 32;
 
     this.init();
   }
@@ -18,18 +18,18 @@ export class Plane {
       this.widthSegments,
       this.heightSegments
     );
-    const material = new THREE.MeshStandardMaterial({
+    const material = new THREE.ShaderMaterial({
       color: 0x00ff88,
       side: THREE.DoubleSide,
     });
     this.mesh = new THREE.Mesh(geometry, material);
+    this.mesh.rotateX(Math.PI / 2)
+    this.mesh.position.x = -60;
+    this.mesh.position.z = 70;
+    this.mesh.position.y = -4;
   }
 
   update() {
-    if (this.mesh) {
-      this.mesh.rotation.x += 0.01;
-      this.mesh.rotation.y += 0.01;
-    }
   }
 
   getMesh() {
