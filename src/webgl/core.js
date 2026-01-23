@@ -1,14 +1,10 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { getProject } from "@theatre/core";
-import studio from "@theatre/studio";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Camera } from "./Camera.js";
 import { Light } from "./Light.js";
 import { GlbModel } from "./objects/GlbModel.js";
-
-gsap.registerPlugin(ScrollTrigger);
+import { TheatreManager } from "./TheatreManager.js";
+import { config } from "../config.js";
 
 export class WebGLApp {
   constructor(selector) {
@@ -31,6 +27,7 @@ export class WebGLApp {
     this.light = new Light(this.scene);
     this.controls = null;
     this.models = [];
+    this.theatreManager = null;
 
     this.init();
     this.setupEventListeners();
@@ -50,79 +47,35 @@ export class WebGLApp {
   }
 
   async initAsync() {
-    // Theatre.js stateを読み込み
-    let theatreState = null;
-    // try {
-    //   const response = await fetch("/animation.json");
-    //   if (response.ok) {
-    //     theatreState = await response.json();
-    //   }
-    // } catch (error) {
-    //   console.warn("Failed to load Theatre state:", error);
-    // }
-
     // Theatre.jsを初期化
-    studio.initialize();
-    const project = getProject("WebGL Project", { state: theatreState });
-    const sheet = project.sheet("Main Scene");
+    this.theatreManager = new TheatreManager(config.theatre);
+    await this.theatreManager.init();
 
-    // カメラオブジェクトを作成
-    const camera = this.camera.instance;
-    const cameraObj = sheet.object("Camera", {
-      position: {
-        x: camera.position.x,
-        y: camera.position.y,
-        z: camera.position.z,
+    this.theatreManager.register(
+      this.camera.instance,
+      "Camera",
+      {
+        position: { x: 0, y: 0, z: 5 },
+        rotation: { x: 0, y: 0, z: 0 },
       },
-      rotation: {
-        x: THREE.MathUtils.radToDeg(camera.rotation.x),
-        y: THREE.MathUtils.radToDeg(camera.rotation.y),
-        z: THREE.MathUtils.radToDeg(camera.rotation.z),
-      },
-    });
-
-    // project.ready後にScrollTrigger設定
-    project.ready.then(() => {
-      // sequenceLengthをstateから取得
-      let sequenceLength = 10; // デフォルト値
-      if (theatreState && theatreState.sheetsById) {
-        const sheetData = Object.values(theatreState.sheetsById)[0];
-        if (sheetData && sheetData.sequence && sheetData.sequence.length) {
-          sequenceLength = sheetData.sequence.length;
-        }
+      (target, values) => {
+        // カメラは度からラジアンへ変換
+        target.position.set(values.position.x, values.position.y, values.position.z);
+        target.rotation.set(
+          THREE.MathUtils.degToRad(values.rotation.x),
+          THREE.MathUtils.degToRad(values.rotation.y),
+          THREE.MathUtils.degToRad(values.rotation.z)
+        );
       }
+    );
 
-      ScrollTrigger.create({
-        trigger: document.body,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 1,
-        markers: true,
-        onUpdate: (self) => {
-          // シーケンス位置を設定
-          const position = self.progress * sequenceLength;
-          sheet.sequence.position = position;
-
-          // カメラの値を取得して適用
-          const values = cameraObj.value;
-          if (values) {
-            camera.position.set(
-              values.position.x,
-              values.position.y,
-              values.position.z
-            );
-            camera.rotation.set(
-              THREE.MathUtils.degToRad(values.rotation.x),
-              THREE.MathUtils.degToRad(values.rotation.y),
-              THREE.MathUtils.degToRad(values.rotation.z)
-            );
-          }
-        },
-      });
-    });
+    // ScrollTriggerを設定（開発モード時は無効化）
+    if (!config.theatre.enableStudio) {
+      this.theatreManager.setupScrollTrigger(config.scrollTrigger);
+    }
 
     // 3Dモデルを読み込み
-    const world = new GlbModel("/landscape.glb");
+    const world = new GlbModel(config.models.landscape);
     this.models.push(world);
 
     world
@@ -143,6 +96,11 @@ export class WebGLApp {
   // カメラのgetterを追加
   getCamera() {
     return this.camera;
+  }
+
+  // TheatreManagerのgetterを追加
+  getTheatreManager() {
+    return this.theatreManager;
   }
 
   // オブジェクトを追加するメソッド

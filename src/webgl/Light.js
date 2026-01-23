@@ -20,6 +20,6 @@ export class Light {
   }
 
   update() {
-    // アニメーションが必要な場合はここに記述
+
   }
 }
