@@ -6,7 +6,7 @@ export const config = {
     stateUrl: "/animation.json",
     projectName: "WebGL Project",
     sheetName: "Main Scene",
-    sequenceLength: 4, // シーケンスの長さ（秒）
+    sequenceLength: 6 , // シーケンスの長さ（秒）
   },
 
   // ScrollTrigger設定

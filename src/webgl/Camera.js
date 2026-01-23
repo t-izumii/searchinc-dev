@@ -9,7 +9,7 @@ export class Camera {
   init() {
     // PerspectiveCamera (fov, aspect, near, far)
     this.instance = new THREE.PerspectiveCamera(
-      75,
+      65,
       window.innerWidth / window.innerHeight,
       0.1,
       500

@@ -3,6 +3,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Camera } from "./Camera.js";
 import { Light } from "./Light.js";
 import { Plane } from "./objects/seaLevel/Plane.js";
+import { SkyObject } from "./objects/SkyObject.js";
 import { GlbModel } from "./objects/GlbModel.js";
 import { TheatreManager } from "./TheatreManager.js";
 import { config } from "../config.js";
@@ -30,6 +31,8 @@ export class WebGLApp {
     this.models = [];
     this.theatreManager = null;
 
+    this.sea = null
+
     this.init();
     this.setupEventListeners();
     this.animate();
@@ -40,7 +43,7 @@ export class WebGLApp {
 
   init() {
     // シーンの背景色
-    this.scene.background = new THREE.Color(0x1a1a1a);
+    this.scene.background = new THREE.Color(0x1a3a4a);
 
     // レンダラーの設定
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -90,8 +93,11 @@ export class WebGLApp {
 
 
     // 水面を作成
-    const sea = new Plane();
-    this.scene.add(sea.getMesh());
+    this.sea = new Plane();
+    this.scene.add(this.sea.getMesh());
+
+    this.sky = new SkyObject();
+    this.scene.add(this.sky.getMesh());
   }
 
   // sceneのgetterを追加
@@ -160,6 +166,11 @@ export class WebGLApp {
 
     // ライトの更新
     this.light.update();
+
+    // 水面の更新（時間を渡す）
+    if (this.sea) {
+      this.sea.update(performance.now() * 0.001); // 秒単位に変換
+    }
 
     // レンダリング
     this.renderer.render(this.scene, this.camera.instance);
