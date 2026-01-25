@@ -2,11 +2,11 @@
 export const config = {
   // Theatre.js設定
   theatre: {
-    enableStudio: false , // true: 編集モード（UIあり、JSONなし）, false: 本番モード（UIなし、JSONあり）
+    enableStudio: false, // true: 編集モード（UIあり、JSONなし）, false: 本番モード（UIなし、JSONあり）
     stateUrl: "/animation.json",
     projectName: "WebGL Project",
     sheetName: "Main Scene",
-    sequenceLength: 6 , // シーケンスの長さ（秒）
+    sequenceLength: 4, // シーケンスの長さ（秒）
   },
 
   // ScrollTrigger設定

@@ -31,7 +31,7 @@ export class WebGLApp {
     this.models = [];
     this.theatreManager = null;
 
-    this.sea = null
+    this.sea = null;
 
     this.init();
     this.setupEventListeners();
@@ -48,6 +48,9 @@ export class WebGLApp {
     // レンダラーの設定
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 0.6;
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
   }
 
   async initAsync() {
@@ -64,13 +67,17 @@ export class WebGLApp {
       },
       (target, values) => {
         // カメラは度からラジアンへ変換
-        target.position.set(values.position.x, values.position.y, values.position.z);
+        target.position.set(
+          values.position.x,
+          values.position.y,
+          values.position.z,
+        );
         target.rotation.set(
           THREE.MathUtils.degToRad(values.rotation.x),
           THREE.MathUtils.degToRad(values.rotation.y),
-          THREE.MathUtils.degToRad(values.rotation.z)
+          THREE.MathUtils.degToRad(values.rotation.z),
         );
-      }
+      },
     );
 
     // ScrollTriggerを設定（開発モード時は無効化）
@@ -85,12 +92,12 @@ export class WebGLApp {
     world
       .load()
       .then((model) => {
+        model.scene.scale.set(40, 40, 40);
         this.scene.add(model.scene);
       })
       .catch((error) => {
         console.error("Failed to load model:", error);
       });
-
 
     // 水面を作成
     this.sea = new Plane();
