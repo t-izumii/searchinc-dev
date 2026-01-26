@@ -9,7 +9,7 @@ body {
   overflow-y: auto;
   font-family: sans-serif;
   /* スクロール可能にするため、高さを設定 */
-  height: 500vh; /* アニメーションの長さに応じて調整 */
+  height: 1000vh; /* アニメーションの長さに応じて調整 */
 }
 
 .webgl {

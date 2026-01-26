@@ -1,4 +1,7 @@
-import { WebGLApp } from "./webgl/index.js";
+import { WebGLApp, MainScene } from "./webgl/index.js";
 
-// アプリケーションを起動
+// Three.jsの基本初期化
 const app = new WebGLApp(".webgl");
+
+// メインシーンを作成してオブジェクトを追加
+const mainScene = new MainScene(app);
