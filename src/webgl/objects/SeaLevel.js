@@ -17,7 +17,7 @@ export class SeaLevel {
       textureWidth: 4400,
       textureHeight: 4400,
       waterNormals: new THREE.TextureLoader().load(
-        "/textures/waternormals.png",
+        "./textures/waternormals.png",
         (texture) => {
           texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
         },

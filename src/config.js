@@ -3,7 +3,7 @@ export const config = {
   // Theatre.js設定
   theatre: {
     enableStudio: true, // true: 編集モード（UIあり、JSONなし）, false: 本番モード（UIなし、JSONあり）
-    stateUrl: "/animation.json",
+    stateUrl: "./animation.json",
     projectName: "WebGL Project",
     sheetName: "Main Scene",
     sequenceLength: 7, // シーケンスの長さ（秒）
@@ -20,6 +20,6 @@ export const config = {
 
   // 3Dモデル設定
   models: {
-    landscape: "/landscape.glb",
+    landscape: "./landscape.glb",
   },
 };

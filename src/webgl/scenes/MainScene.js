@@ -89,7 +89,7 @@ export class MainScene {
       // mountainに岩のテクスチャを適用
       if (this.underwater) {
         const textureLoader = new THREE.TextureLoader();
-        const rockTexture = textureLoader.load("/textures/image.png");
+        const rockTexture = textureLoader.load("./textures/image.png");
 
         // テクスチャの設定
         rockTexture.wrapS = THREE.RepeatWrapping;
@@ -109,7 +109,7 @@ export class MainScene {
       // mountainに岩のテクスチャを適用
       if (this.mountain) {
         const textureLoader = new THREE.TextureLoader();
-        const rockTexture = textureLoader.load("/textures/mountain.png");
+        const rockTexture = textureLoader.load("./textures/mountain.png");
 
         // テクスチャの設定
         rockTexture.wrapS = THREE.RepeatWrapping;
