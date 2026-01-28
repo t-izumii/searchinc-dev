@@ -31,7 +31,7 @@ export class SeaLevel {
     });
 
     this.mesh.rotation.x = -Math.PI / 2;
-    this.mesh.position.set(-2200, 0, 1900);
+    this.mesh.position.set(-2660, 0, 1900);
   }
 
   update(time) {

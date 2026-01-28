@@ -44,7 +44,7 @@ export class MainScene {
       this.camera.instance,
       "Camera",
       {
-        position: { x: 0, y: 0, z: 5 },
+        position: { x: 0, y: 0, z: 0 },
         rotation: { x: 0, y: 0, z: 0 },
       },
       (target, values) => {
@@ -165,6 +165,11 @@ export class MainScene {
     // RenderTargetのサイズを大きくして解像度を上げる（512 → 2048）
     this.caustic = new Caustic(2048);
 
+    // @@@ コースティクスのメッシュを可視化（一時的）
+    // const causticMesh = this.caustic.getMesh();
+    // causticMesh.position.set(-2000, 1, 2000);
+    // this.scene.add(causticMesh);
+
     // コースティクステクスチャをmountainに適用
     if (this.underwater) {
       const causticTexture = this.caustic.getTexture();
@@ -238,15 +243,21 @@ export class MainScene {
     // カメラが水面より下にいるかチェック
     const isUnderwater = cameraY < waterLevel;
 
+    // 水中用ライトの切り替え
+    const light = this.app.getLight();
+    if (light) {
+      light.setUnderwater(isUnderwater);
+    }
+
     if (isUnderwater) {
-      // 水中：明るい青緑色（シアン系）のフォグを有効化
+      // 水中：明るく透明感のある青色のフォグを有効化
       if (!this.scene.fog) {
-        this.scene.fog = new THREE.FogExp2(0x6aaccc, 0.0001);
+        this.scene.fog = new THREE.FogExp2(0xc0e8ff, 0.0004);
       }
       // 水深に応じてフォグの濃度を調整（濃度も薄くする）
       const depth = waterLevel - cameraY;
-      this.scene.fog.density = 0.0003 + depth * 0.0000001;
-      this.scene.fog.color.setHex(0x6aaccc);
+      this.scene.fog.density = 0.0004;
+      this.scene.fog.color.setHex(0xc0e8ff);
 
       // 海面の表示切り替え：水中ではsea1を非表示、sea2を表示
       if (this.sea1) {

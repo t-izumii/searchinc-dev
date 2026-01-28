@@ -2,7 +2,7 @@
 export const config = {
   // Theatre.js設定
   theatre: {
-    enableStudio: false, // true: 編集モード（UIあり、JSONなし）, false: 本番モード（UIなし、JSONあり）
+    enableStudio: true, // true: 編集モード（UIあり、JSONなし）, false: 本番モード（UIなし、JSONあり）
     stateUrl: "/animation.json",
     projectName: "WebGL Project",
     sheetName: "Main Scene",

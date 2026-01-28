@@ -10,7 +10,7 @@ export class TheatreManager {
     this.enableStudio = options.enableStudio ?? true;
     // enableStudioがfalseの場合のみJSONから読み込む
     this.useState = !this.enableStudio;
-    this.stateUrl = options.stateUrl ?? "/animation.json";
+    this.stateUrl = options.stateUrl;
     this.projectName = options.projectName ?? "WebGL Project";
     this.sheetName = options.sheetName ?? "Main Scene";
     this.sequenceLength = options.sequenceLength ?? 10;

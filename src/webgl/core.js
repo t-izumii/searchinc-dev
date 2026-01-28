@@ -57,6 +57,11 @@ export class WebGLApp {
     return this.renderer;
   }
 
+  // lightのgetterを追加
+  getLight() {
+    return this.light;
+  }
+
   // オブジェクトを追加するメソッド
   addObject(object) {
     this.scene.add(object);
