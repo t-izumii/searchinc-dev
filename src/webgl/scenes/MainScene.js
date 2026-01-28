@@ -21,6 +21,7 @@ export class MainScene {
     this.text = null;
     this.heading = new THREE.Group();
     this.mountain = null;
+    this.underwater = null;
 
     // 非同期初期化を実行
     this.init();
@@ -77,20 +78,43 @@ export class MainScene {
       model.scene.scale.set(40, 40, 40);
       this.scene.add(model.scene);
 
+      console.log(model.scene.children);
+
       // オブジェクトを取得
       this.title = model.scene.getObjectByName("intro_title");
       this.text = model.scene.getObjectByName("intro_sub");
+      this.underwater = model.scene.getObjectByName("underwater");
       this.mountain = model.scene.getObjectByName("mountain");
 
       // mountainに岩のテクスチャを適用
-      if (this.mountain) {
+      if (this.underwater) {
         const textureLoader = new THREE.TextureLoader();
         const rockTexture = textureLoader.load("/textures/image.png");
 
         // テクスチャの設定
         rockTexture.wrapS = THREE.RepeatWrapping;
         rockTexture.wrapT = THREE.RepeatWrapping;
-        rockTexture.repeat.set(40, 40); // テクスチャの繰り返し回数
+        rockTexture.repeat.set(6, 6); // テクスチャの繰り返し回数
+
+        // mountainの全てのメッシュにテクスチャを適用
+        this.underwater.traverse((child) => {
+          if (child.isMesh) {
+            child.material = child.material.clone();
+            child.material.map = rockTexture;
+            child.material.needsUpdate = true;
+          }
+        });
+      }
+
+      // mountainに岩のテクスチャを適用
+      if (this.mountain) {
+        const textureLoader = new THREE.TextureLoader();
+        const rockTexture = textureLoader.load("/textures/mountain.png");
+
+        // テクスチャの設定
+        rockTexture.wrapS = THREE.RepeatWrapping;
+        rockTexture.wrapT = THREE.RepeatWrapping;
+        rockTexture.repeat.set(6, 6); // テクスチャの繰り返し回数
 
         // mountainの全てのメッシュにテクスチャを適用
         this.mountain.traverse((child) => {
@@ -138,14 +162,16 @@ export class MainScene {
     this.sea2.getMesh().rotation.x += Math.PI;
     this.scene.add(this.sea2.getMesh());
 
-    this.caustic = new Caustic();
-    // コースティクスメッシュは不要（テクスチャのみ使用）
-    // this.scene.add(this.caustic.getMesh());
+    // RenderTargetのサイズを大きくして解像度を上げる（512 → 2048）
+    this.caustic = new Caustic(2048);
 
     // コースティクステクスチャをmountainに適用
-    if (this.mountain) {
+    if (this.underwater) {
       const causticTexture = this.caustic.getTexture();
-      // this.applyCausticsToMountain(this.mountain, causticTexture);
+      // テクスチャを繰り返すように設定
+      causticTexture.wrapS = THREE.RepeatWrapping;
+      causticTexture.wrapT = THREE.RepeatWrapping;
+      this.applyCausticsToMountain(this.underwater, causticTexture);
     }
 
     // 空を作成
@@ -182,6 +208,22 @@ export class MainScene {
       });
     }
 
+    // mountainのシェーダーのuTimeを更新
+    if (this.underwater) {
+      this.app.addUpdateCallback(() => {
+        const time = performance.now() * 0.001;
+        this.underwater.traverse((child) => {
+          if (
+            child.isMesh &&
+            child.material &&
+            child.material.userData.shader
+          ) {
+            child.material.userData.shader.uniforms.uTime.value = time;
+          }
+        });
+      });
+    }
+
     // 水中エフェクトの更新
     this.app.addUpdateCallback(() => {
       this.updateUnderwaterEffect();
@@ -190,21 +232,21 @@ export class MainScene {
 
   // 水中エフェクトの更新
   updateUnderwaterEffect() {
-    const waterLevel = -20; // SeaLevelと同じY座標
+    const waterLevel = 0; // SeaLevelと同じY座標
     const cameraY = this.camera.instance.position.y;
 
     // カメラが水面より下にいるかチェック
     const isUnderwater = cameraY < waterLevel;
 
     if (isUnderwater) {
-      // 水中：淡い青緑色のフォグを有効化
+      // 水中：明るい青緑色（シアン系）のフォグを有効化
       if (!this.scene.fog) {
-        this.scene.fog = new THREE.FogExp2(0x475c6b, 0.0005);
+        this.scene.fog = new THREE.FogExp2(0x6aaccc, 0.0001);
       }
-      // 水深に応じてフォグの濃度を調整
+      // 水深に応じてフォグの濃度を調整（濃度も薄くする）
       const depth = waterLevel - cameraY;
-      this.scene.fog.density = 0.0007 + depth * 0.0000001;
-      this.scene.fog.color.setHex(0x475c6b);
+      this.scene.fog.density = 0.0003 + depth * 0.0000001;
+      this.scene.fog.color.setHex(0x6aaccc);
 
       // 海面の表示切り替え：水中ではsea1を非表示、sea2を表示
       if (this.sea1) {
@@ -239,9 +281,10 @@ export class MainScene {
         material.onBeforeCompile = (shader) => {
           // ユニフォームを追加
           shader.uniforms.tCaustics = { value: causticTexture };
-          shader.uniforms.uWaterLevel = { value: -20 }; // 水面のY座標
+          shader.uniforms.uWaterLevel = { value: 0 }; // 水面のY座標
           shader.uniforms.uWaterSize = { value: 4000 }; // 水面のサイズ
-          shader.uniforms.uCausticsIntensity = { value: 0.5 }; // コースティクスの強度
+          shader.uniforms.uCausticsIntensity = { value: 2.0 }; // コースティクスの強度を上げる
+          shader.uniforms.uTime = { value: 0 }; // 時間のuniform
 
           // 頂点シェーダーにvarying変数を追加
           shader.vertexShader = shader.vertexShader.replace(
@@ -269,6 +312,7 @@ export class MainScene {
             uniform float uWaterLevel;
             uniform float uWaterSize;
             uniform float uCausticsIntensity;
+            uniform float uTime;
             varying vec3 vWorldPosition;
             `,
           );
@@ -279,20 +323,19 @@ export class MainScene {
             `
             #include <dithering_fragment>
 
-            // ワールド座標からUV座標を計算（正投影カメラの範囲に合わせる）
-            vec2 causticsUV = (vWorldPosition.xz + uWaterSize * 0.5) / uWaterSize;
+            // ワールド座標からUV座標を計算（タイリングで無限に繰り返す）
+            // スケールファクター：値を大きくすると模様が小さくなる
+            float scale = 0.0002; // 1 / 2000
+            vec2 causticsUV = vWorldPosition.xz * scale;
 
             // コースティクステクスチャをサンプリング
-            float caustics = texture2D(tCaustics, causticsUV).r;
+            vec4 causticsColor = texture2D(tCaustics, causticsUV);
 
-            // 水面より下にのみコースティクスを適用
-            float waterMask = step(vWorldPosition.y, uWaterLevel);
+            // コースティクスの効果を強調
+            float caustics = causticsColor.r * uCausticsIntensity;
 
-            // コースティクスの強度を調整（0.5〜1.5の範囲に）
-            caustics = mix(1.0, caustics * uCausticsIntensity + (1.0 - uCausticsIntensity * 0.5), waterMask);
-
-            // 最終カラーに乗算
-            gl_FragColor.rgb *= caustics;
+            // 青緑色でコースティクスを加算
+            gl_FragColor.rgb += caustics * abs(vWorldPosition.y) * 0.00005 * vec3(0.4, 0.6, 0.8);
             `,
           );
 
