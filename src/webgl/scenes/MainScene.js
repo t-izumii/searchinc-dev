@@ -345,8 +345,8 @@ export class MainScene {
             // コースティクスの効果を強調
             float caustics = causticsColor.r * uCausticsIntensity;
 
-            // 青緑色でコースティクスを加算
-            gl_FragColor.rgb += caustics * abs(vWorldPosition.y) * 0.00005 * vec3(0.4, 0.6, 0.8);
+            // コースティクスを加算
+            gl_FragColor.rgb += caustics * (1.0 / (1.0 + abs(vWorldPosition.y) * 0.01)) * 0.15 * vec3(0.3, 0.6, 0.8);
             `,
           );
 
