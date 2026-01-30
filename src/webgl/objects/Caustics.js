@@ -51,22 +51,11 @@ export class Caustic {
         uniform vec3 uResolution;
         varying vec2 vUv;
 
-        // Adapting ShaderToy globals to standard uniforms
         #define iTime uTime
         #define iResolution uResolution
 
-        // ==========================================
-        // USER PROVIDED SHADER CODE STARTS HERE
-        // ==========================================
 
         #define Use_Perlin
-        //#define Use_Value
-        //#define Use_Simplex
-
-        // ========= Hash ===========
-
-        // Grab from https://www.shadertoy.com/view/4djSRW
-        //#define MOD3 vec3(.1031,.11369,.13787)
         #define MOD3 vec3(443.8975,397.2973, 491.1871)
         float hash31(vec3 p3)
         {
@@ -332,9 +321,6 @@ export class Caustic {
             }
         }
 
-        // ==========================================
-        // ADAPTER WRAPPER
-        // ==========================================
         void main() {
             mainImage(gl_FragColor, vUv * uResolution.xy);
         }
